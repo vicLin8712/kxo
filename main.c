@@ -233,6 +233,14 @@ static void game_tasklet_func(unsigned long __data)
         smp_wmb();
         queue_work(kxo_workqueue, &ai_two_work);
     }
+
+    /* Try to sent each step to user space */
+    mutex_lock(&consumer_lock);
+    produce_table();
+    mutex_unlock(&consumer_lock);
+
+    wake_up_interruptible(&rx_wait);
+
     tv_end = ktime_get();
 
     nsecs = (s64) ktime_to_ns(ktime_sub(tv_end, tv_start));
