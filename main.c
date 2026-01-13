@@ -227,11 +227,9 @@ static void game_tasklet_func(unsigned long __data)
 
     if (finish && turn == 'O') {
         WRITE_ONCE(finish, 0);
-        smp_wmb();
         queue_work(kxo_workqueue, &ai_one_work);
     } else if (finish && turn == 'X') {
         WRITE_ONCE(finish, 0);
-        smp_wmb();
         queue_work(kxo_workqueue, &ai_two_work);
     }
 
@@ -396,7 +394,9 @@ static const struct file_operations kxo_fops = {
     .owner = THIS_MODULE,
 #endif
     .read = kxo_read,
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 12, 0)
     .llseek = no_llseek,
+#endif
     .open = kxo_open,
     .release = kxo_release,
     .poll = kxo_poll};
